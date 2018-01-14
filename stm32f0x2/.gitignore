@@ -1,0 +1,5 @@
+*.bak
+DapperMiser THUMB Debug\*
+DapperMiser THUMB Release\*
+build\*
+*.hzs
