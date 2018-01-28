@@ -26,24 +26,24 @@ const USBD_CompClassTypeDef USBD_VendorHID =
 
 /* NOTE: manually ensure that the size of this report equals the value given in the descriptor in usbd_desc.c */
 
-__ALIGN_BEGIN static const uint8_t VendorHID_ReportDesc[35]  __ALIGN_END =
+__ALIGN_BEGIN static const uint8_t VendorHID_ReportDesc[33]  __ALIGN_END =
 {
-  0x06, 0x00, 0xFF, // Usage Page = 0xFF00 (Vendor Defined Page 1)
-  0x09, 0x01,       // Usage (Vendor Usage 1)
-  0xA1, 0x01,       // Collection (Application)
-  0x15, 0x00,       // Logical Minimum
-  0x26, 0xFF, 0x00, // Logical Maximum
-  0x75, 0x08,       // Report Size: 8-bit
-  0x96, (HID_EP_SIZE >> 0), (HID_EP_SIZE >> 8), // Report Count
-  0x09, 0x01,       // Usage (Vendor Usage 1)
-  0x81, 0x02,       // Input: variable
-  0x96, (HID_EP_SIZE >> 0), (HID_EP_SIZE >> 8), // Report Count
-  0x09, 0x01,       // Usage (Vendor Usage 1)
-  0x91, 0x02,       // Output: variable
-  0x95, 0x01,       // Report Count
-  0x09, 0x01,       // Usage (Vendor Usage 1)
-  0xB1, 0x02,       // Feature: Variable
-  0xC0,             // End Collection
+  0x06, 0x00, 0xFF,  // Usage Page = 0xFF00 (Vendor Defined Page 1)
+  0x09, 0x01,        // Usage (Vendor Usage 1)
+  0xA1, 0x01,        // Collection (Application)
+  0x15, 0x00,        // Logical Minimum
+  0x26, 0xFF, 0x00,  // Logical Maximum
+  0x75, 0x08,        // Report Size: 8-bit
+  0x95, HID_EP_SIZE, // Report Count
+  0x09, 0x01,        // Usage (Vendor Usage 1)
+  0x81, 0x02,        // Input: variable
+  0x95, HID_EP_SIZE, // Report Count
+  0x09, 0x01,        // Usage (Vendor Usage 1)
+  0x91, 0x02,        // Output: variable
+  0x95, 0x01,        // Report Count
+  0x09, 0x01,        // Usage (Vendor Usage 1)
+  0xB1, 0x02,        // Feature: Variable
+  0xC0,              // End Collection
 }; 
 
 /* HID report, endpoint numbers, and interface number for each VendorHID instance */

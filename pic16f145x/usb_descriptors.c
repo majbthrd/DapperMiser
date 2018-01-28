@@ -62,22 +62,22 @@ const ROMPTR struct device_descriptor this_device_descriptor =
 /* HID Report descriptor */
 static const ROMPTR uint8_t custom_report_descriptor[] =
 {
- 0x06, 0x00, 0xFF, // Usage Page = 0xFF00 (Vendor Defined Page 1)
- 0x09, 0x01,       // Usage (Vendor Usage 1)
- 0xA1, 0x01,       // Collection (Application)
- 0x15, 0x00,       // Logical Minimum
- 0x26, 0xFF, 0x00, // Logical Maximum
- 0x75, 0x08,       // Report Size: 8-bit
- 0x96, (EP_1_IN_LEN >> 0), (EP_1_IN_LEN >> 8), // Report Count
- 0x09, 0x01,       // Usage (Vendor Usage 1)
- 0x81, 0x02,       // Input: variable
- 0x96, (EP_1_OUT_LEN >> 0), (EP_1_OUT_LEN >> 8), // Report Count
- 0x09, 0x01,       // Usage (Vendor Usage 1)
- 0x91, 0x02,       // Output: variable
- 0x95, 0x01,       // Report Count
- 0x09, 0x01,       // Usage (Vendor Usage 1)
- 0xB1, 0x02,       // Feature: Variable
- 0xC0,             // End Collection
+ 0x06, 0x00, 0xFF,   // Usage Page = 0xFF00 (Vendor Defined Page 1)
+ 0x09, 0x01,         // Usage (Vendor Usage 1)
+ 0xA1, 0x01,         // Collection (Application)
+ 0x15, 0x00,         // Logical Minimum
+ 0x26, 0xFF, 0x00,   // Logical Maximum
+ 0x75, 0x08,         // Report Size: 8-bit
+ 0x95, EP_1_IN_LEN,  // Report Count
+ 0x09, 0x01,         // Usage (Vendor Usage 1)
+ 0x81, 0x02,         // Input: variable
+ 0x95, EP_1_OUT_LEN, // Report Count
+ 0x09, 0x01,         // Usage (Vendor Usage 1)
+ 0x91, 0x02,         // Output: variable
+ 0x95, 0x01,         // Report Count
+ 0x09, 0x01,         // Usage (Vendor Usage 1)
+ 0xB1, 0x02,         // Feature: Variable
+ 0xC0,               // End Collection
 };
 
 /* Configuration 1 Descriptor */
