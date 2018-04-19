@@ -100,7 +100,7 @@ __ALIGN_BEGIN static const struct configuration_1 USBD_Composite_CfgFSDesc __ALI
 
   {
 #if (NUM_OF_VENDORHID > 0)
-    VENDORHID_DESCRIPTOR(/* ITF */ (2 * NUM_OF_CDC_UARTS), /* DataOut EP */ 0x07, /* DataIn EP */ 0x87, /* HID report size */ 35)
+    VENDORHID_DESCRIPTOR(/* ITF */ (2 * NUM_OF_CDC_UARTS), /* DataOut EP */ 0x07, /* DataIn EP */ 0x87, /* HID report size */ 33)
 #endif
   },
 
