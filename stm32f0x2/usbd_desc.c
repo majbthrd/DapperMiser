@@ -28,7 +28,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define USBD_VID                      0x1209
-#define USBD_PID                      0x0001
+#define USBD_PID                      0x2488
 #define USBD_LANGID_STRING            0x409
 #define USBD_MANUFACTURER_STRING      "Acme"
 #define USBD_PRODUCT_FS_STRING        "CMSIS-DAP"

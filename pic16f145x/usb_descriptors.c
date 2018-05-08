@@ -51,7 +51,7 @@ const ROMPTR struct device_descriptor this_device_descriptor =
 	0x00, /* Protocol. */
 	EP_0_LEN, // bMaxPacketSize0
 	0x1209, // Vendor
-	0x0001, // Product
+	0x2488, // Product
 	0x0003, // device release
 	0, // Manufacturer
 	1, // Product

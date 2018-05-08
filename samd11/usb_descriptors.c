@@ -43,7 +43,7 @@ const usb_device_descriptor_t usb_device_descriptor __attribute__ ((aligned (4))
   .bDeviceProtocol    = 0x00,
   .bMaxPacketSize0    = DAP_PACKET_SIZE,
   .idVendor           = 0x1209,
-  .idProduct          = 0x0001,
+  .idProduct          = 0x2488,
   .bcdDevice          = 0x0100,
   .iManufacturer      = USB_STR_ZERO,
   .iProduct           = USB_STR_PRODUCT,
