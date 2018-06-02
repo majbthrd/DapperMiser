@@ -85,19 +85,19 @@ static const struct
 #if (NUM_OF_CDC_UARTS > 0)
   {
     .Instance = USART1,
-    .data_in_ep  = 0x81,
-    .data_out_ep = 0x01,
-    .command_ep  = 0x82,
-    .command_itf = 0x00,
+    .data_in_ep  = 0x82,
+    .data_out_ep = 0x02,
+    .command_ep  = 0x83,
+    .command_itf = 0x01,
   },
 #endif
 #if (NUM_OF_CDC_UARTS > 1)
   {
     .Instance = USART3,
-    .data_in_ep  = 0x83,
-    .data_out_ep = 0x03,
-    .command_ep  = 0x84,
-    .command_itf = 0x02,
+    .data_in_ep  = 0x84,
+    .data_out_ep = 0x04,
+    .command_ep  = 0x85,
+    .command_itf = 0x03,
   },
 #endif
 };

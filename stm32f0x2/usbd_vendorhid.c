@@ -58,9 +58,9 @@ static const struct
   {
     .ReportDesc = VendorHID_ReportDesc,
     .ReportDesc_Length = sizeof(VendorHID_ReportDesc),
-    .data_in_ep = 0x87,
-    .data_out_ep = 0x07,
-    .itf_num = (2 * NUM_OF_CDC_UARTS),
+    .data_in_ep = 0x81,
+    .data_out_ep = 0x01,
+    .itf_num = 0,
   },
 #endif
 };

@@ -100,22 +100,18 @@ __ALIGN_BEGIN static const struct configuration_1 USBD_Composite_CfgFSDesc __ALI
 
   {
 #if (NUM_OF_VENDORHID > 0)
-    VENDORHID_DESCRIPTOR(/* ITF */ (2 * NUM_OF_CDC_UARTS), /* DataOut EP */ 0x07, /* DataIn EP */ 0x87, /* HID report size */ 33)
+    VENDORHID_DESCRIPTOR(/* ITF */ 0x00, /* DataOut EP */ 0x01, /* DataIn EP */ 0x81, /* HID report size */ 33)
 #endif
   },
 
   {
 #if (NUM_OF_CDC_UARTS > 0)
     /* CDC1 */
-    CDC_DESCRIPTOR(/* Command ITF */ 0x00, /* Data ITF */ 0x01, /* Command EP */ 0x82, /* DataOut EP */ 0x01, /* DataIn EP */ 0x81)
+    CDC_DESCRIPTOR(/* Command ITF */ 0x01, /* Data ITF */ 0x02, /* Command EP */ 0x83, /* DataOut EP */ 0x02, /* DataIn EP */ 0x82)
 #endif
 #if (NUM_OF_CDC_UARTS > 1)
     /* CDC2 */
-    CDC_DESCRIPTOR(/* Command ITF */ 0x02, /* Data ITF */ 0x03, /* Command EP */ 0x84, /* DataOut EP */ 0x03, /* DataIn EP */ 0x83)
-#endif
-#if (NUM_OF_CDC_UARTS > 2)
-    /* CDC3 */
-    CDC_DESCRIPTOR(/* Command ITF */ 0x04, /* Data ITF */ 0x05, /* Command EP */ 0x86, /* DataOut EP */ 0x05, /* DataIn EP */ 0x85)
+    CDC_DESCRIPTOR(/* Command ITF */ 0x03, /* Data ITF */ 0x04, /* Command EP */ 0x85, /* DataOut EP */ 0x04, /* DataIn EP */ 0x84)
 #endif
   },
 };
