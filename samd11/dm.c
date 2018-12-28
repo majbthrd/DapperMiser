@@ -264,17 +264,20 @@ start_of_request:
 		if (2 /* WAIT */ == ack)
 		{
 			retry_count++;
-                        if (retry_count < 8)
+			shift_bits_in(1); /* turnaround cycle (Figure 2-4 DDI 0316D) */
+			if (retry_count < 8)
 				goto start_of_request;
+			else
+				goto finish_transfer;
 		}
 		
-                if (1 /* OK */ != ack)
-                {
-			/* there was a WAIT retry timeout *OR* the ACK was unrecognized / FAULT, so we bail */
+		if (1 /* OK */ != ack)
+		{
+			/* the ACK was unrecognized / FAULT, so we bail */
 			flags |= FLAG_BUSFAULT;
-			ack = 4;
-                        goto finish_transfer;
-                }
+			ack = 4 /* FAULT */;
+			goto finish_transfer;
+		}
 
 		if (0 == (transfer_request & 0x22))
 		{
@@ -344,14 +347,14 @@ finish_transfer:
 		else
 			*(response_count + 1) = ack;
 
-		if (ack & 0x10) /* a match value failure is reason to abandon any subsequent entries */
-			break;
-
 		if (flags & FLAG_BUSFAULT)
                 {
 			shift_bits_in(100);
 			break;
-                }
+		}
+
+		if (1 /* OK */ != ack) /* anything but OK is cause to abandon any subsequent entries */
+			break;
 
 		if (transfer_request & 0x02)
 			output += 4;
