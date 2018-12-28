@@ -1,0 +1,6 @@
+*.bak
+NUC121dm THUMB Debug/*
+NUC121dm THUMB Release/*
+*.hzs
+make/build/*
+
