@@ -30,28 +30,14 @@
 since this is a downloaded app, configuration words (e.g. __CONFIG or #pragma config) are not relevant
 */
 
-static uint8_t calc_next_index(uint8_t current)
-{
-	current++;
-
-	if (current >= DAP_PACKET_COUNT)
-		current = 0;
-
-	return current;
-}
-
 int main(void)
 {
 	uint8_t *TxDataBuffer;
 	uint8_t *RxDataBuffer;
-	static uint8_t incoming[DAP_PACKET_COUNT][EP_1_OUT_LEN];
-	uint8_t read_index, write_index, next_index, action_index;
 
 	usb_init();
 
 	TxDataBuffer = usb_get_in_buffer(1);
-
-	read_index = write_index = action_index = 0;
 
 	for (;;)
 	{
@@ -63,46 +49,29 @@ int main(void)
 		if (!usb_is_configured())
 			continue;
 
-		next_index = calc_next_index(write_index);
+		/*
+		we check these *BEFORE* calling usb_out_endpoint_has_data() as the documentation indicates this 
+		must be followed usb_arm_out_endpoint() to enable reception of the next transaction
+		*/
+		if (usb_in_endpoint_halted(1) || usb_in_endpoint_busy(1))
+			continue;
 
 		/* if we pass this test, we are committed to make the usb_arm_out_endpoint() call */
-		if ( usb_out_endpoint_has_data(1) && (next_index != read_index))
-		{
-			/* obtain a pointer to the receive buffer and the length of data contained within it */
-			usb_get_out_buffer(1, &RxDataBuffer);
+		if (!usb_out_endpoint_has_data(1))
+			continue;
 
-			memcpy(incoming[write_index], RxDataBuffer, EP_1_OUT_LEN);
-			write_index = next_index;
+		/* obtain a pointer to the receive buffer and the length of data contained within it */
+		usb_get_out_buffer(1, &RxDataBuffer);
 
-			/* re-arm the endpoint to receive the next EP1 OUT */
-			usb_arm_out_endpoint(1);
-		}
+		/* invoke Dapper Miser implementation */
+		memcpy(TxDataBuffer, RxDataBuffer, EP_1_OUT_LEN);
+		dap_handler(TxDataBuffer);
 
-		if (read_index != action_index)
-		{
-			/* proceed further only when the IN endpoint is ready */
-			if (!usb_in_endpoint_halted(1) && !usb_in_endpoint_busy(1))
-			{
-				memcpy(TxDataBuffer, incoming[read_index], EP_1_IN_LEN);
+		/* send a response back to the PC */
+		usb_send_in_buffer(1, EP_1_IN_LEN);
 
-				/* send a response back to the PC */
-				usb_send_in_buffer(1, EP_1_IN_LEN);
-
-				read_index = calc_next_index(read_index);
-			}
-		}
-
-		if (action_index != write_index)
-		{
-			RxDataBuffer = incoming[action_index];
-
-			/* invoke Dapper Miser implementation */
-			dap_handler(RxDataBuffer);
-
-			/* update action_index to the next message */
-			action_index = calc_next_index(action_index);
-		}
-
+		/* re-arm the endpoint to receive the next EP1 OUT */
+		usb_arm_out_endpoint(1);
 	}
 }
 
