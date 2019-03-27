@@ -162,7 +162,7 @@ static uint8_t shift_bits_in(uint8_t count)
 static void dap_transfer(const uint8_t *input, uint8_t *output)
 {
 	uint8_t transfer_count, transfer_request, swd_request, ack, retry_count;
-	uint8_t *response_count, *word_value;
+	uint8_t *response_count;
 	static uint8_t mask_value[4], match_value[4];
 
 	response_count = output;
@@ -207,19 +207,21 @@ static void dap_transfer(const uint8_t *input, uint8_t *output)
 
 			/* determine if this transfer has a "Transfer Data" field */
 			if (0x12 == (transfer_request & 0x32))
-				word_value = match_value; /* READ  operation is providing match value */
-			else if (0x20 == (transfer_request & 0x32))
-				word_value = mask_value;  /* WRITE operation is providing match mask  */
-			else
-				word_value = NULL;
-
-			if (word_value)
 			{
-				/* "Transfer Data" field does exist, so store provided value */
-				word_value[0] = *input++;
-				word_value[1] = *input++;
-				word_value[2] = *input++;
-				word_value[3] = *input++;
+				/* READ operation is providing match value */
+				match_value[0] = *input++;
+				match_value[1] = *input++;
+				match_value[2] = *input++;
+				match_value[3] = *input++;
+			}
+			else if (0x20 == (transfer_request & 0x32))
+			{
+				/* WRITE operation is providing match mask */
+				mask_value[0] = *input++;
+				mask_value[1] = *input++;
+				mask_value[2] = *input++;
+				mask_value[3] = *input++;
+				ack = 1;
 				goto finish_transfer;
 			}
 
@@ -303,17 +305,6 @@ start_of_request:
 			if (parity & 0x01)
 				ack = 0x08; /* not ORed so as to be consistent with reference implementation */
 			shift_bits_in(1); /* end turnaround */
-
-			if (transfer_request & 0x10)
-			{
-				if (
-					( match_value[0] != (output[0] & mask_value[0]) ) ||
-					( match_value[1] != (output[1] & mask_value[1]) ) ||
-					( match_value[2] != (output[2] & mask_value[2]) ) ||
-					( match_value[3] != (output[3] & mask_value[3]) )
-				)
-					ack |= 0x10;
-			}
 		}
 
 		/* leave bus in the "IDLE" state, per DDI 0316D */
@@ -335,6 +326,21 @@ start_of_request:
 			goto start_of_request;
 		}
 
+		if (transfer_request & 0x10)
+		{
+			if (
+				( match_value[0] != (output[0] & mask_value[0]) ) ||
+				( match_value[1] != (output[1] & mask_value[1]) ) ||
+				( match_value[2] != (output[2] & mask_value[2]) ) ||
+				( match_value[3] != (output[3] & mask_value[3]) )
+			)
+			{
+				if (++retry_count < 64)
+					goto start_of_request;
+				ack |= 0x10;
+			}
+		}
+
 finish_transfer:
 		(*response_count)++;
 		transfer_count--;
@@ -348,7 +354,7 @@ finish_transfer:
 			*(response_count + 1) = ack;
 
 		if (flags & FLAG_BUSFAULT)
-                {
+		{
 			shift_bits_in(100);
 			break;
 		}
@@ -356,7 +362,7 @@ finish_transfer:
 		if (1 /* OK */ != ack) /* anything but OK is cause to abandon any subsequent entries */
 			break;
 
-		if (transfer_request & 0x02)
+		if (0x02 == (transfer_request & 0x12))
 			output += 4;
 	}
 }
