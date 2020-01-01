@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Peter Lawrence
+ * Copyright (c) 2018, 2019, Peter Lawrence
  * All rights reserved.
  *
  * This code originated from:
@@ -58,14 +58,14 @@
 #define PERIPH_SETUP_BUF_LEN   8
 #define PERIPH_EP0_BUF_BASE    (PERIPH_SETUP_BUF_BASE + PERIPH_SETUP_BUF_LEN)
 #define PERIPH_EP0_BUF_LEN     64
-#define PERIPH_EP1_BUF_BASE    (PERIPH_SETUP_BUF_BASE + PERIPH_SETUP_BUF_LEN)
+#define PERIPH_EP1_BUF_BASE    (PERIPH_EP0_BUF_BASE + PERIPH_EP0_BUF_LEN)
 #define PERIPH_EP1_BUF_LEN     64
 #define PERIPH_EP2_BUF_BASE    (PERIPH_EP1_BUF_BASE + PERIPH_EP1_BUF_LEN)
 
 #define USBD_BUF_BASE   (USBD_BASE + 0x100)
 #define USBD_MAX_EP     8
 
-enum
+enum ep_enum
 {
   PERIPH_EP0 = 0,
   PERIPH_EP1 = 1,
@@ -115,14 +115,14 @@ static usb_ep_callback_t usb_ep_callbacks[USBD_MAX_EP];
 /*- Prototypes --------------------------------------------------------------*/
 static void periph_ep0_callback(uint8_t *data, int size);
 static void periph_ep1_callback(uint8_t *data, int size);
-static void usb_callback(int ep_index, uint8_t *data, int size);
+static void usb_callback(enum ep_enum ep_index, uint8_t *data, int size);
 
 /*- Implementations ---------------------------------------------------------*/
 
 //-----------------------------------------------------------------------------
 void usb_set_callback(int ep, void (*callback)(uint8_t *data, int size))
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   usb_ep_callbacks[ep_index] = callback;
 }
 
@@ -151,7 +151,7 @@ void usb_hw_init(void)
   USBD->EP[PERIPH_EP1].CFG = USBD_CFG_CSTALL_Msk | USBD_CFG_EPMODE_OUT;
   USBD->EP[PERIPH_EP1].BUFSEG = PERIPH_EP1_BUF_BASE;
 
-  for (int ep_index = PERIPH_EP2; ep_index < USBD_MAX_EP; ep_index++)
+  for (enum ep_enum ep_index = PERIPH_EP2; ep_index < USBD_MAX_EP; ep_index++)
   {
     usb_reset_endpoint(ep_index);
   }
@@ -163,7 +163,7 @@ void usb_hw_init(void)
   usb_attach();
 
   USBD->INTSTS = USBD_INTEN_BUSIEN_Msk | USBD_INTEN_USBIEN_Msk | USBD_INTEN_VBDETIEN_Msk | USBD_INTEN_WKEN_Msk | USBD_INTEN_SOFIEN_Msk;
-  USBD->INTSTS = USBD_INTEN_BUSIEN_Msk | USBD_INTEN_USBIEN_Msk | USBD_INTEN_VBDETIEN_Msk | USBD_INTEN_WKEN_Msk | USBD_INTEN_SOFIEN_Msk;
+  USBD->INTEN  = USBD_INTEN_BUSIEN_Msk | USBD_INTEN_USBIEN_Msk | USBD_INTEN_VBDETIEN_Msk | USBD_INTEN_WKEN_Msk | USBD_INTEN_SOFIEN_Msk;
 
 //  NVIC_EnableIRQ(USBD_IRQn);
 }
@@ -183,7 +183,7 @@ void usb_detach(void)
 //-----------------------------------------------------------------------------
 void usb_reset_endpoint(int ep)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   USBD->EP[ep_index].CFGP &= ~USBD_CFG_STATE_Msk;
 }
 
@@ -204,7 +204,7 @@ void usb_configure_endpoint(usb_endpoint_descriptor_t *desc)
   type = desc->bmAttributes & 0x03;
   size = desc->wMaxPacketSize & 0x3ff;
 
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
 
   cfg = ep;
   cfg |= (USB_IN_ENDPOINT == dir) ? USBD_CFG_EPMODE_IN : USBD_CFG_EPMODE_OUT;
@@ -221,7 +221,7 @@ void usb_configure_endpoint(usb_endpoint_descriptor_t *desc)
 //-----------------------------------------------------------------------------
 bool usb_endpoint_configured(int ep, int dir)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   uint32_t searchfor = ep << USBD_CFG_EPNUM_Pos;
 
   if (USB_IN_ENDPOINT == dir)
@@ -235,7 +235,7 @@ bool usb_endpoint_configured(int ep, int dir)
 //-----------------------------------------------------------------------------
 int usb_endpoint_get_status(int ep, int dir)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   return (USBD->EP[ep_index].CFGP & USBD_CFGP_SSTALL_Msk) ? 1 : 0;
   (void)dir;
 }
@@ -243,7 +243,7 @@ int usb_endpoint_get_status(int ep, int dir)
 //-----------------------------------------------------------------------------
 void usb_endpoint_set_feature(int ep, int dir)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   USBD->EP[ep_index].CFGP |= USBD_CFGP_SSTALL_Msk;
   (void)dir;
 }
@@ -251,7 +251,7 @@ void usb_endpoint_set_feature(int ep, int dir)
 //-----------------------------------------------------------------------------
 void usb_endpoint_clear_feature(int ep, int dir)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   USBD->EP[ep_index].CFGP &= ~USBD_CFGP_SSTALL_Msk;
   (void)dir;
 }
@@ -265,7 +265,7 @@ void usb_set_address(int address)
 //-----------------------------------------------------------------------------
 void usb_send(int ep, uint8_t *data, int size)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   memcpy((uint8_t *)(USBD_BUF_BASE + USBD->EP[ep_index].BUFSEG), data, size);
   USBD->EP[ep_index].MXPLD = size;
 }
@@ -273,7 +273,7 @@ void usb_send(int ep, uint8_t *data, int size)
 //-----------------------------------------------------------------------------
 void usb_recv(int ep, int size)
 {
-  int ep_index = PERIPH_EP1 + ep;
+  enum ep_enum ep_index = PERIPH_EP1 + ep;
   USBD->EP[ep_index].MXPLD = size;
 }
 
@@ -406,7 +406,7 @@ void usb_task(void)
       rewind_ctrlin();
 
       /* Reset all endpoints to DATA0 */
-      for(int ep_index = 0; ep_index < USBD_MAX_EP; ep_index++)
+      for(enum ep_enum ep_index = 0; ep_index < USBD_MAX_EP; ep_index++)
         USBD->EP[ep_index].CFG &= ~USBD_CFG_DSQSYNC_Msk;
 
       /* Reset USB device address */
@@ -452,7 +452,7 @@ void usb_task(void)
     }
 
     /* service EP0 through EP7 */
-    int ep_index;
+    enum ep_enum ep_index;
     uint32_t mask;
     for (ep_index = PERIPH_EP0, mask = USBD_INTSTS_EPEVT0_Msk; ep_index <= PERIPH_EP7; ep_index++, mask <<= 1)
     {
@@ -473,7 +473,7 @@ void usb_task(void)
 }
 
 //-----------------------------------------------------------------------------
-static void usb_callback(int ep_index, uint8_t *data, int size)
+static void usb_callback(enum ep_enum ep_index, uint8_t *data, int size)
 {
   if (usb_ep_callbacks[ep_index])
     usb_ep_callbacks[ep_index](data, size);
